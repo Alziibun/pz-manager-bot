@@ -70,7 +70,7 @@ public class Zomboid {
             jvmArgs.add(jvmArgsJSON.getString(i));
         }
 
-
+        // COMPILE COMMAND
 
         List<String> command = new ArrayList<>();
         command.add(jBin);
@@ -79,6 +79,8 @@ public class Zomboid {
         command.add(classpath);
         command.add(mainClass);
         command.addAll(args);
+
+        // BUILD PROCESS
 
         ProcessBuilder builder = new ProcessBuilder(command);
         Zomboid.process = builder.inheritIO().start();
