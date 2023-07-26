@@ -36,6 +36,9 @@ public class Main {
         }
         DiscordApi api = new DiscordApiBuilder()
                 .setToken(config.getProperty("token"))
+                .addServerBecomesAvailableListener( event -> {
+                    System.out.println("Loaded " + event.getServer().getName());
+                })
                 .login()
                 .join();
     }
