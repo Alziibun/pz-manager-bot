@@ -5,5 +5,5 @@ gradle
 gradelew
 gradlew.bat
 settings.gradle
-bot.config
+*.config
 /gradlew
