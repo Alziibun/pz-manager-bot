@@ -15,6 +15,7 @@ import org.json.JSONObject;
 public class Zomboid {
     private static File jar;
     private static Process process;
+    public static File consoleLog;
 
     private Zomboid () {
 
@@ -86,4 +87,11 @@ public class Zomboid {
         Zomboid.process = builder.inheritIO().start();
     }
 
+    public static void readLog() {
+
+    }
+
+    public File getConsoleLog() {
+        return new File("console.txt"); //TODO: search for console log
+    }
 }
