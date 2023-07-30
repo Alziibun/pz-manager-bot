@@ -8,9 +8,13 @@ import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Scanner;
+
 import org.json.JSONArray;
 import org.apache.commons.io.IOUtils;
 import org.json.JSONObject;
+
+// TODO: add console log reading
 
 public class Zomboid {
     private static File jar;
@@ -21,7 +25,9 @@ public class Zomboid {
 
     }
 
-    public static void start(List<String> args) throws IOException {
+    public static void start() throws IOException {
+        //start the project zomboid game server process
+
         // get java arguments
         String os = System.getProperty("os.name");
         String wd = System.getProperty("user.dir");
@@ -29,6 +35,10 @@ public class Zomboid {
         String jBin;
         File startupJSON;
         File home64 = new File(jHome + "64");
+        System.out.print("Project Zomboid Server location: ")
+        Scanner zScan = new Scanner(System.in);
+        String zLoc = zScan.nextLine();
+
 
         // if jre64 exists, that means the system supports 64-bit java
         System.out.println("Starting Project Zomboid server");
@@ -79,16 +89,11 @@ public class Zomboid {
         command.add("-cp");
         command.add(classpath);
         command.add(mainClass);
-        command.addAll(args);
 
         // BUILD PROCESS
 
         ProcessBuilder builder = new ProcessBuilder(command);
         Zomboid.process = builder.inheritIO().start();
-    }
-
-    public static void readLog() {
-
     }
 
     public File getConsoleLog() {

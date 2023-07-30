@@ -8,9 +8,8 @@ import java.util.Properties;
 import java.util.Scanner;
 
 public class Discord {
-    private static String token;
     public static DiscordApi api;
-    private static Properties config;
+    public static Properties config;
     private static File configFile;
 
     public Discord() {
@@ -22,6 +21,7 @@ public class Discord {
             configFile = new File("pz-manager.config");
             configFile.createNewFile();
             FileReader reader = new FileReader(configFile);
+            config = new Properties();
             config.load(reader);
             reader.close();
         } catch (IOException e) {
@@ -37,7 +37,7 @@ public class Discord {
     }
 
     private static String getToken() {
-        if (token == null) {
+        if (config.getProperty("discord.token") == null) {
             try {
                 System.out.println("Couldn't get Discord Bot Token!");
                 Scanner input = new Scanner(System.in);
@@ -51,6 +51,6 @@ public class Discord {
                 throw new RuntimeException(e);
             }
         }
-        return token;
+        return config.getProperty("discord.token");
     }
 }
