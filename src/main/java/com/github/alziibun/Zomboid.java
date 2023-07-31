@@ -144,15 +144,6 @@ public class Zomboid {
         }
     }
 
-    public static void end() {
-        System.out.println("quitting the server");
-        try {
-            process.outputWriter().write("quit");
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        }
-    }
-
     public File getConsoleLog() {
         return new File("console.txt"); //TODO: search for console log
     }
