@@ -8,7 +8,9 @@ import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 import java.util.Scanner;
+import java.util.stream.Collectors;
 
 import org.json.JSONArray;
 import org.apache.commons.io.IOUtils;
@@ -35,9 +37,6 @@ public class Zomboid {
         String jBin;
         File startupJSON;
         File home64 = new File(jHome + "64");
-        System.out.print("Project Zomboid Server location: ")
-        Scanner zScan = new Scanner(System.in);
-        String zLoc = zScan.nextLine();
 
 
         // if jre64 exists, that means the system supports 64-bit java
@@ -73,13 +72,41 @@ public class Zomboid {
         JSONObject json = new JSONObject(JSONText);
         String mainClass = json.getString("mainClass");
         System.out.println("Main Class: " + mainClass);
-        String classpath = json.getJSONArray("classpath").join(";");
+        String classpath = json
+            .getJSONArray("classpath")
+            .toList()
+            .stream()
+            .map(object -> Objects.toString(object, null))
+            .collect(Collectors.joining(";"));
         System.out.println("ClassPath: " + classpath);
         List<String> jvmArgs = new ArrayList<>();
         JSONArray jvmArgsJSON = json.getJSONArray("vmArgs");
-        for (int i = 0; i < jvmArgsJSON.length(); i++) {
+        for (int i = jvmArgsJSON.length()-1; i > 0; i--) {
             jvmArgs.add(jvmArgsJSON.getString(i));
         }
+
+        JSONObject os_conditionals = json.getJSONObject("windows");
+        List<Object> os_vmArgs = new ArrayList<>();
+        if (os_conditionals != null) {
+            if (os.equalsIgnoreCase("windows 7")) {
+                // turn windows 7 args into a JSON object
+                os_vmArgs = os_conditionals
+                        .getJSONObject("7")
+                        .getJSONArray("vmArgs")
+                        .toList();
+
+            } else if (os.equalsIgnoreCase("windows 10")) {
+                // turn windows 10 args into a JSON object
+                os_vmArgs = os_conditionals
+                        .getJSONObject("10")
+                        .getJSONArray("vmArgs")
+                        .toList();
+            }
+            for (Object obj : os_vmArgs) {
+                jvmArgs.add(obj != null ? obj.toString() : null);
+            }
+        }
+        System.out.println(jvmArgs);
 
         // COMPILE COMMAND
 
@@ -88,12 +115,42 @@ public class Zomboid {
         command.addAll(jvmArgs);
         command.add("-cp");
         command.add(classpath);
-        command.add(mainClass);
+        command.add("zombie.network.GameServer");
+        command.add("-statistic 0");
+
 
         // BUILD PROCESS
-
         ProcessBuilder builder = new ProcessBuilder(command);
-        Zomboid.process = builder.inheritIO().start();
+        builder
+                .redirectInput(ProcessBuilder.Redirect.INHERIT)
+                .redirectOutput(ProcessBuilder.Redirect.INHERIT)
+                .redirectError(ProcessBuilder.Redirect.INHERIT);
+        process = builder.start();
+        //input(); //TODO: allow user to write directly
+    }
+
+    public static void input() {
+        while (process.isAlive()) {
+            try {
+                BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
+                int input = Integer.parseInt(br.readLine());
+                OutputStream stdout = process.getOutputStream();
+                stdout.write(input);
+                br.close();
+            } catch (IOException e) {
+                throw new RuntimeException(e);
+            }
+
+        }
+    }
+
+    public static void end() {
+        System.out.println("quitting the server");
+        try {
+            process.outputWriter().write("quit");
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
     }
 
     public File getConsoleLog() {
