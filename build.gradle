@@ -2,8 +2,20 @@ plugins {
     id 'java'
 }
 
+jar {
+    duplicatesStrategy DuplicatesStrategy.EXCLUDE
+    manifest {
+        attributes 'Main-Class': 'com.github.alziibun.Main'
+    }
+    doFirst {
+        from {
+            configurations.runtimeClasspath.collect { it.isDirectory() ? it : zipTree(it) }
+        }
+    }
+    exclude 'META-INF/*.RSA', 'META-INF/*.SF','META-INF/*.DSA'
+}
 group 'com.github.alziibun'
-version '1.0-SNAPSHOT'
+version 'prototype'
 
 sourceCompatibility = 1.8
 
