@@ -1,5 +1,5 @@
 # Project Zomboid Server Manager
-!(Join the discord!)[https://img.shields.io/discord/1113045590541074452?style=flat&logo=discord&logoColor=white]
+![Join the discord!](https://img.shields.io/discord/1113045590541074452?style=flat&logo=discord&logoColor=white)
 
 
 A discord bot focused on helping manage a Project Zomboid hosting on sites like Apex Hosting and G-PORTAL.
