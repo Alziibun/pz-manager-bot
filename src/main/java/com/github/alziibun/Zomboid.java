@@ -118,7 +118,7 @@ public class Zomboid {
         command.addAll(jvmArgs);
         command.add("-cp");
         command.add(classpath);
-        command.add("java/zombie/network/GameServer");
+        command.add("zombie/network/GameServer");
         command.add("-statistic 0");
 
 
@@ -140,6 +140,7 @@ public class Zomboid {
         }
     }
     public static void linux() throws IOException {
+        System.out.println("Starting Linux version of Zomboid Server.");
         List<String> command = new ArrayList<>();
         command.add("sh");
         command.add("start-server.sh");

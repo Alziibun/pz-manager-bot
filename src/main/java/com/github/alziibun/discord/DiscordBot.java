@@ -1,6 +1,7 @@
 package com.github.alziibun.discord;
 
 import com.github.alziibun.Program;
+import com.github.alziibun.discord.commands.server;
 import org.javacord.api.DiscordApi;
 import org.javacord.api.DiscordApiBuilder;
 import org.javacord.api.entity.intent.Intent;
@@ -22,6 +23,7 @@ public class DiscordBot {
                 .setToken(getToken())
                 .addIntents(Intent.GUILDS)
                 .login().join();
+        api.addSlashCommandCreateListener(server::handle);
     }
 
     private static String getToken() {

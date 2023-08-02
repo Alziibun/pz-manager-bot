@@ -7,9 +7,11 @@ import org.javacord.api.interaction.SlashCommand;
 import org.javacord.api.interaction.SlashCommandInteraction;
 import org.javacord.api.interaction.SlashCommandOption;
 import org.javacord.api.interaction.SlashCommandOptionType;
+import org.javacord.api.interaction.callback.InteractionOriginalResponseUpdater;
 
 import java.io.IOException;
 import java.util.Arrays;
+import java.util.concurrent.CompletableFuture;
 
 public class server {
     public SlashCommand command;
@@ -24,16 +26,22 @@ public class server {
                                 "restart", "Stops, then starts your server again safely.")
                 )).createGlobal(DiscordBot.api).join();
     }
-    public void handle(SlashCommandCreateEvent event) {
+    public static void handle(SlashCommandCreateEvent event) {
         SlashCommandInteraction interaction = event.getSlashCommandInteraction();
+        // why the hell is this so long?
+        CompletableFuture<InteractionOriginalResponseUpdater> promise = interaction.respondLater();
+        System.out.println(interaction.getFullCommandName());
         switch (interaction.getFullCommandName()) {
             case "server start":
                 try {
-                    Zomboid.start();
-                    interaction
-                            .createImmediateResponder()
-                            .setContent("Server starting.");
+                    Zomboid.linux();
+                    promise.thenAccept(updater -> {
+                        updater.setContent("Server is starting.");
+                    });
                 } catch (IOException ex) {
+                    promise.thenAccept(updater -> {
+                        updater.setContent("Failed to start server.");
+                    });
                     ex.printStackTrace();
                 }
             case "server stop":
