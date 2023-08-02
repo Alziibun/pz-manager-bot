@@ -14,13 +14,14 @@ import java.util.stream.Collectors;
 
 import org.json.JSONArray;
 import org.apache.commons.io.IOUtils;
+import org.json.JSONException;
 import org.json.JSONObject;
 
 // TODO: add console log reading
 
 public class Zomboid {
     private static File jar;
-    private static Process process;
+    private static Process server;
     public static File consoleLog;
 
     private Zomboid () {
@@ -84,26 +85,28 @@ public class Zomboid {
         for (int i = jvmArgsJSON.length()-1; i > 0; i--) {
             jvmArgs.add(jvmArgsJSON.getString(i));
         }
+        if (os.toLowerCase().contains("windows")) {
+            System.out.println("Using windows configuration");
+            JSONObject os_conditionals = json.getJSONObject("windows");
+            List<Object> os_vmArgs = new ArrayList<>();
+            if (os_conditionals != null) {
+                if (os.equalsIgnoreCase("windows 7")) {
+                    // turn windows 7 args into a JSON object
+                    os_vmArgs = os_conditionals
+                            .getJSONObject("7")
+                            .getJSONArray("vmArgs")
+                            .toList();
 
-        JSONObject os_conditionals = json.getJSONObject("windows");
-        List<Object> os_vmArgs = new ArrayList<>();
-        if (os_conditionals != null) {
-            if (os.equalsIgnoreCase("windows 7")) {
-                // turn windows 7 args into a JSON object
-                os_vmArgs = os_conditionals
-                        .getJSONObject("7")
-                        .getJSONArray("vmArgs")
-                        .toList();
-
-            } else if (os.equalsIgnoreCase("windows 10")) {
-                // turn windows 10 args into a JSON object
-                os_vmArgs = os_conditionals
-                        .getJSONObject("10")
-                        .getJSONArray("vmArgs")
-                        .toList();
-            }
-            for (Object obj : os_vmArgs) {
-                jvmArgs.add(obj != null ? obj.toString() : null);
+                } else if (os.equalsIgnoreCase("windows 10")) {
+                    // turn windows 10 args into a JSON object
+                    os_vmArgs = os_conditionals
+                            .getJSONObject("10")
+                            .getJSONArray("vmArgs")
+                            .toList();
+                }
+                for (Object obj : os_vmArgs) {
+                    jvmArgs.add(obj != null ? obj.toString() : null);
+                }
             }
         }
         System.out.println(jvmArgs);
@@ -115,7 +118,7 @@ public class Zomboid {
         command.addAll(jvmArgs);
         command.add("-cp");
         command.add(classpath);
-        command.add("zombie.network.GameServer");
+        command.add("java/zombie/network/GameServer");
         command.add("-statistic 0");
 
 
@@ -125,16 +128,35 @@ public class Zomboid {
                 .redirectInput(ProcessBuilder.Redirect.INHERIT)
                 .redirectOutput(ProcessBuilder.Redirect.INHERIT)
                 .redirectError(ProcessBuilder.Redirect.INHERIT);
-        process = builder.start();
+        server = builder.start();
         //input(); //TODO: allow user to write directly
     }
 
+    public static void stop() throws IOException {
+        if (server.isAlive()) {
+            server
+                    .getOutputStream()
+                    .write(Integer.parseInt("quit"));
+        }
+    }
+    public static void linux() throws IOException {
+        List<String> command = new ArrayList<>();
+        command.add("sh");
+        command.add("start-server.sh");
+        ProcessBuilder builder = new ProcessBuilder(command);
+        builder
+                .redirectInput(ProcessBuilder.Redirect.INHERIT)
+                .redirectOutput(ProcessBuilder.Redirect.INHERIT)
+                .redirectError(ProcessBuilder.Redirect.INHERIT);
+        server = builder.start();
+    }
+
     public static void input() {
-        while (process.isAlive()) {
+        while (server.isAlive()) {
             try {
                 BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
                 int input = Integer.parseInt(br.readLine());
-                OutputStream stdout = process.getOutputStream();
+                OutputStream stdout = server.getOutputStream();
                 stdout.write(input);
                 br.close();
             } catch (IOException e) {
