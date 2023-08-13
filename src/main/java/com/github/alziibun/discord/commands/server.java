@@ -2,6 +2,7 @@ package com.github.alziibun.discord.commands;
 
 import com.github.alziibun.Zomboid;
 import com.github.alziibun.discord.DiscordBot;
+import org.javacord.api.entity.message.MessageFlag;
 import org.javacord.api.event.interaction.SlashCommandCreateEvent;
 import org.javacord.api.interaction.SlashCommand;
 import org.javacord.api.interaction.SlashCommandInteraction;
@@ -10,6 +11,7 @@ import org.javacord.api.interaction.SlashCommandOptionType;
 import org.javacord.api.interaction.callback.InteractionOriginalResponseUpdater;
 
 import java.io.IOException;
+import java.io.InputStream;
 import java.util.Arrays;
 import java.util.concurrent.CompletableFuture;
 
@@ -34,25 +36,30 @@ public class server {
         switch (interaction.getFullCommandName()) {
             case "server start":
                 try {
-                    Zomboid.linux();
                     promise.thenAccept(updater -> {
-                        updater.setContent("Server is starting.");
+                        updater
+                                .setContent("Server is starting.")
+                                .setFlags(MessageFlag.EPHEMERAL)
+                                .update();
                     });
+                    Zomboid.linux();
                 } catch (IOException ex) {
                     promise.thenAccept(updater -> {
-                        updater.setContent("Failed to start server.");
+                        updater
+                                .setContent("Failed to start server.")
+                                .setFlags(MessageFlag.EPHEMERAL)
+                                .update();
                     });
                     ex.printStackTrace();
                 }
             case "server stop":
-                try {
-                    Zomboid.stop();
-                    interaction
-                            .createImmediateResponder()
-                            .setContent("Server stopped.");
-                } catch (IOException ex) {
-                    ex.printStackTrace();
-                }
+                Zomboid.send("quit");
+                promise.thenAccept(updater -> {
+                    updater
+                            .setContent("Server stopping.")
+                            .setFlags(MessageFlag.EPHEMERAL)
+                            .update();
+                        });
         }
     }
 }

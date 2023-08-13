@@ -133,11 +133,9 @@ public class Zomboid {
     }
 
     public static void stop() throws IOException {
-        if (server.isAlive()) {
-            server
-                    .getOutputStream()
-                    .write(Integer.parseInt("quit"));
-        }
+        assert server != null;
+        assert server.isAlive();
+        send("quit");
     }
     public static void linux() throws IOException {
         System.out.println("Starting Linux version of Zomboid Server.");
@@ -146,24 +144,30 @@ public class Zomboid {
         command.add("start-server.sh");
         ProcessBuilder builder = new ProcessBuilder(command);
         builder
-                .redirectInput(ProcessBuilder.Redirect.INHERIT)
+                .redirectInput(ProcessBuilder.Redirect.PIPE)
                 .redirectOutput(ProcessBuilder.Redirect.INHERIT)
                 .redirectError(ProcessBuilder.Redirect.INHERIT);
         server = builder.start();
     }
 
-    public static void input() {
+    public static void enableLogging() {
+        assert server != null;
         while (server.isAlive()) {
-            try {
-                BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
-                int input = Integer.parseInt(br.readLine());
-                OutputStream stdout = server.getOutputStream();
-                stdout.write(input);
-                br.close();
-            } catch (IOException e) {
-                throw new RuntimeException(e);
-            }
+            server.getInputStream();
+        }
+    }
 
+    public static void send(String command) {
+        assert server != null;
+        assert server.isAlive();
+        OutputStream stdin = server.getOutputStream();
+        BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(stdin));
+        try {
+            writer.write(command);
+            writer.flush();
+            writer.close();
+        } catch (IOException e) {
+            throw new RuntimeException(e);
         }
     }
 
