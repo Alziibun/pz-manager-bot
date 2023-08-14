@@ -32,16 +32,13 @@ public class server {
     public static void handle(SlashCommandCreateEvent event) {
         SlashCommandInteraction interaction = event.getSlashCommandInteraction();
         // why the hell is this so long?
-        CompletableFuture<InteractionOriginalResponseUpdater> promise = interaction.respondLater();
+        CompletableFuture<InteractionOriginalResponseUpdater> promise = interaction.respondLater(true);
         System.out.println(interaction.getFullCommandName());
         switch (interaction.getFullCommandName()) {
             case "server start":
                 try {
                     promise.thenAccept(updater -> {
-                        updater
-                                .setContent("Server is starting.")
-                                .setFlags(MessageFlag.EPHEMERAL)
-                                .update();
+                        updater.setContent("Server is starting...").update();
                     });
                     Zomboid.linux();
                 } catch (IOException ex) {
@@ -56,16 +53,14 @@ public class server {
             case "server stop":
                 Zomboid.send("quit");
                 promise.thenAccept(updater -> {
-                    updater
-                            .setContent("Server stopping.")
-                            .setFlags(MessageFlag.EPHEMERAL)
-                            .update();
+                    updater.setContent("Server stopping...").update();
                         });
             case "server restart":
                     promise.thenAccept(updater -> {
                         if (Objects.requireNonNull(Zomboid.server).isAlive()) {
                             // if the server is still running, stop it
                             Zomboid.send("quit");
+                            updater.setContent("Stopping server...");
                             try {
                                 Zomboid.server.waitFor();
                             } catch (InterruptedException e) {
@@ -75,6 +70,7 @@ public class server {
                         try {
                             // start ubuntu version, TODO: replace with agnostic method
                             Zomboid.linux();
+                            updater.setContent("Starting server...").update();
                         } catch (IOException e) {
                             throw new RuntimeException(e);
                         }
