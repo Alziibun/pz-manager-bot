@@ -21,7 +21,7 @@ import org.json.JSONObject;
 
 public class Zomboid {
     private static File jar;
-    private static Process server;
+    public static Process server;
     public static File consoleLog;
 
     private Zomboid () {

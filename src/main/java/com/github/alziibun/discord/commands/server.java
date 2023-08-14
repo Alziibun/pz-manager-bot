@@ -13,6 +13,7 @@ import org.javacord.api.interaction.callback.InteractionOriginalResponseUpdater;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.Arrays;
+import java.util.Objects;
 import java.util.concurrent.CompletableFuture;
 
 public class server {
@@ -60,6 +61,24 @@ public class server {
                             .setFlags(MessageFlag.EPHEMERAL)
                             .update();
                         });
+            case "server restart":
+                    promise.thenAccept(updater -> {
+                        if (Objects.requireNonNull(Zomboid.server).isAlive()) {
+                            // if the server is still running, stop it
+                            Zomboid.send("quit");
+                            try {
+                                Zomboid.server.waitFor();
+                            } catch (InterruptedException e) {
+                                throw new RuntimeException(e);
+                            }
+                        }
+                        try {
+                            // start ubuntu version, TODO: replace with agnostic method
+                            Zomboid.linux();
+                        } catch (IOException e) {
+                            throw new RuntimeException(e);
+                        }
+                    });
         }
     }
 }
