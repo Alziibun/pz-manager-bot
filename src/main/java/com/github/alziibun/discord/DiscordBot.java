@@ -2,6 +2,7 @@ package com.github.alziibun.discord;
 
 import com.github.alziibun.Program;
 import com.github.alziibun.discord.commands.server;
+import com.github.alziibun.discord.commands.whitelist;
 import org.javacord.api.DiscordApi;
 import org.javacord.api.DiscordApiBuilder;
 import org.javacord.api.entity.intent.Intent;
@@ -24,6 +25,7 @@ public class DiscordBot {
                 .addIntents(Intent.GUILDS)
                 .login().join();
         api.addSlashCommandCreateListener(server::handle);
+        api.addSlashCommandCreateListener(whitelist::handle);
     }
 
     private static String getToken() {
