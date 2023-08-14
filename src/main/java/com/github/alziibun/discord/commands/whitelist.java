@@ -20,8 +20,10 @@ public class whitelist {
                         SlashCommandOption.createWithOptions(SlashCommandOptionType.SUB_COMMAND,
                                 "add", "Add a user to your Project Zomboid server.",
                                 Arrays.asList(
+                                    SlashCommandOption.create(SlashCommandOptionType.USER,
+                                            "user", "Select a discord user to add to your whitelist"),
                                     SlashCommandOption.create(SlashCommandOptionType.STRING,
-                                            "username", "Case Sensitive: the player's username", true),
+                                            "username", "Case Sensitive: the player's username, for when you'd like to set a custom name", false),
                                     SlashCommandOption.create(SlashCommandOptionType.STRING,
                                             "password", "Create a manual password, if left empty creates a strong password automatically.", false)
                                 )),
@@ -32,13 +34,22 @@ public class whitelist {
     public static void handle(SlashCommandCreateEvent event) {
         SlashCommandInteraction interaction = event.getSlashCommandInteraction();
         CompletableFuture<InteractionOriginalResponseUpdater> promise = interaction.respondLater(true);
-        String username = String.valueOf(interaction.getArgumentStringValueByName("username"));
-        String password = String.valueOf(interaction.getArgumentStringValueByName("password"));
+        String username = interaction.getArgumentStringValueByName("username").toString();
+
+        // CHECKS
+        assert !username.isEmpty();
+        // zomboid username char limit is 20
+        if (username.length() > 20) {
+            promise.thenAccept(updater -> {
+                updater.setContent("Username cannot be more than 20 characters.").update();
+                    });
+        }
+        String password = interaction.getArgumentStringValueByName("password").toString();
         String argString = String.format("\"%s\"", username);
         if (password != null) {
-            argString = argString + String.format(" \"%s\"", password);
+            argString = argString.concat(String.format(" \"%s\"", password));
         }
-        assert username != null;
+
         switch (interaction.getFullCommandName()) {
             case "whitelist add":
                 // adduser can take a password optional TODO: create password generator
