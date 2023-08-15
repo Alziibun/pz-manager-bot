@@ -2,14 +2,13 @@ package com.github.alziibun.discord.commands;
 
 import com.github.alziibun.Zomboid;
 import com.github.alziibun.discord.DiscordBot;
+import org.javacord.api.entity.user.User;
 import org.javacord.api.event.interaction.SlashCommandCreateEvent;
-import org.javacord.api.interaction.SlashCommand;
-import org.javacord.api.interaction.SlashCommandInteraction;
-import org.javacord.api.interaction.SlashCommandOption;
-import org.javacord.api.interaction.SlashCommandOptionType;
+import org.javacord.api.interaction.*;
 import org.javacord.api.interaction.callback.InteractionOriginalResponseUpdater;
 
 import java.util.Arrays;
+import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 
 public class whitelist {
@@ -35,7 +34,7 @@ public class whitelist {
         SlashCommandInteraction interaction = event.getSlashCommandInteraction();
         CompletableFuture<InteractionOriginalResponseUpdater> promise = interaction.respondLater(true);
         String username = interaction.getArgumentStringValueByName("username").toString();
-
+        Optional<SlashCommandInteractionOption> user = interaction.getArgumentByName("user");
         // CHECKS
         assert !username.isEmpty();
         // zomboid username char limit is 20
