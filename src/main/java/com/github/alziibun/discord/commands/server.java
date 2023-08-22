@@ -36,20 +36,10 @@ public class server {
         System.out.println(interaction.getFullCommandName());
         switch (interaction.getFullCommandName()) {
             case "server start":
-                try {
-                    promise.thenAccept(updater -> {
-                        updater.setContent("Server is starting...").update();
-                    });
-                    Zomboid.linux();
-                } catch (IOException ex) {
-                    promise.thenAccept(updater -> {
-                        updater
-                                .setContent("Failed to start server.")
-                                .setFlags(MessageFlag.EPHEMERAL)
-                                .update();
-                    });
-                    ex.printStackTrace();
-                }
+                promise.thenAccept(updater -> {
+                    updater.setContent("Server is starting...").update();
+                });
+                Zomboid.start();
             case "server stop":
                 Zomboid.send("quit");
                 promise.thenAccept(updater -> {
@@ -62,18 +52,15 @@ public class server {
                             Zomboid.send("quit");
                             updater.setContent("Stopping server...");
                             try {
+                                // wait for server process to end
                                 Zomboid.server.waitFor();
                             } catch (InterruptedException e) {
                                 throw new RuntimeException(e);
                             }
                         }
-                        try {
-                            // start ubuntu version, TODO: replace with agnostic method
-                            Zomboid.linux();
-                            updater.setContent("Starting server...").update();
-                        } catch (IOException e) {
-                            throw new RuntimeException(e);
-                        }
+                        // start zomboid server
+                        Zomboid.start();
+                        updater.setContent("Starting server...").update();
                     });
         }
     }

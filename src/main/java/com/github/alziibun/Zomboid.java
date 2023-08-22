@@ -28,7 +28,25 @@ public class Zomboid {
 
     }
 
-    public static void start() throws IOException {
+    public static void start() {
+        String os = System.getProperty("os.name");
+        if (os.toLowerCase().contains("windows")) {
+            try {windows();}
+            catch (IOException ex) {
+                ex.printStackTrace();
+            }
+        } else {
+            // TODO: determine possible os strings
+            try {
+                linux();
+            }
+            catch (IOException ex) {
+                ex.printStackTrace();
+            }
+        }
+    }
+
+    public static void windows() throws IOException {
         //start the project zomboid game server process
 
         // get java arguments
